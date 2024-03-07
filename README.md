@@ -1,2 +1,2 @@
 # goblockchain
-Blockchain Go
+Blockchain in Go
