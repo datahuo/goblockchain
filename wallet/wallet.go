@@ -7,9 +7,9 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"math/big"
 
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/erdincmutlu/goblockchain/utils"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -37,7 +37,7 @@ func NewWallet() *Wallet {
 	// 4. Add version byte in front of RIPEMD-160 hash (0x00 Main Network)
 	vd4 := make([]byte, 21)
 	vd4[0] = 0x00
-	copy(vd4[1:], digest3)
+	copy(vd4[1:], digest3[:])
 
 	// 5. Perform SHA-256 hash on the extended RIPEMD-160 result.
 	h5 := sha256.New()
@@ -101,11 +101,11 @@ func NewTransaction(privateKey *ecdsa.PrivateKey, publicKey *ecdsa.PublicKey,
 	return &Transaction{privateKey, publicKey, sender, recipient, value}
 }
 
-func (t *Transaction) GenerateSignature() *Signature {
+func (t *Transaction) GenerateSignature() *utils.Signature {
 	m, _ := json.Marshal(t)
 	h := sha256.Sum256([]byte(m))
 	r, s, _ := ecdsa.Sign(rand.Reader, t.senderPrivateKey, h[:])
-	return &Signature{r, s}
+	return &utils.Signature{R: r, S: s}
 }
 
 func (t *Transaction) MarshalJSON() ([]byte, error) {
@@ -118,13 +118,4 @@ func (t *Transaction) MarshalJSON() ([]byte, error) {
 		Recipient: t.recipientBlockchainAddress,
 		Value:     t.value,
 	})
-}
-
-type Signature struct {
-	R *big.Int
-	S *big.Int
-}
-
-func (s *Signature) String() string {
-	return fmt.Sprintf("%x%x", s.R, s.S)
 }
