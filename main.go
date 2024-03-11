@@ -2,15 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/erdincmutlu/goblockchain/block"
 	"github.com/erdincmutlu/goblockchain/wallet"
 )
-
-func init() {
-	log.SetPrefix("Blockchain: ")
-}
 
 func main() {
 	walletM := wallet.NewWallet()
