@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -71,6 +72,20 @@ func (ws *WalletServer) CreateTransaction(w http.ResponseWriter, r *http.Request
 			io.WriteString(w, string(utils.JsonStatus("fail")))
 			return
 		}
+
+		publicKey := utils.PublicKeyFromString(*t.SenderPublicKey)
+		privateKey := utils.PrivateKeyFromString(*t.SenderPrivateKey, publicKey)
+		value, err := strconv.ParseFloat(*t.Value, 32)
+		if err != nil {
+			log.Printf("ERROR: parse error\n")
+			io.WriteString(w, string(utils.JsonStatus("fail")))
+			return
+		}
+
+		value32 := float32(value)
+		w.Header().Add("Content-Type", "application/json")
+		fmt.Println(privateKey)
+		fmt.Printf("%.1f\n", value32)
 
 	default:
 		w.WriteHeader(http.StatusBadRequest)
