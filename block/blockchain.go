@@ -134,6 +134,7 @@ func (bc *Blockchain) Chain() []*Block {
 
 func (bc *Blockchain) Run() {
 	bc.StartSyncNeighbours()
+	bc.ResolveConflicts()
 }
 
 func (bc *Blockchain) SetNeighbours() {
@@ -306,6 +307,14 @@ func (bc *Blockchain) Mining() bool {
 	previousHash := bc.LastBlock().Hash()
 	bc.CreateBlock(nonce, previousHash)
 	log.Println("action=mining, status=success")
+
+	for _, n := range bc.neighbours {
+		endpoint := fmt.Sprintf("http://%s/consensus", n)
+		client := &http.Client{}
+		req, _ := http.NewRequest("PUT", endpoint, nil)
+		resp, _ := client.Do(req)
+		log.Printf("%v", resp)
+	}
 	return true
 }
 
@@ -349,7 +358,7 @@ func (bc *Blockchain) ValidChain(chain []*Block) bool {
 	return true
 }
 
-func (bc *Blockchain) Resolveconlicts() bool {
+func (bc *Blockchain) ResolveConflicts() bool {
 	var longestChain []*Block = nil
 	maxLength := len(bc.chain)
 
